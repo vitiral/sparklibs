@@ -1,6 +1,8 @@
 #ifndef __tcp_client_h
 #define __tcp_client_h
 
+#include "allduino.h"
+
 enum IO_STATUS{
     IO_FREE,
     IO_SENDING
