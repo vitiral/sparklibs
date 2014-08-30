@@ -1,4 +1,3 @@
-
 #include "json.h"
 
 uint16_t put_json(char *buf, uint16_t len, uint8_t type, char *name, float value, uint8_t precision);
