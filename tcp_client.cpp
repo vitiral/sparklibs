@@ -4,6 +4,11 @@ TCP_Client::TCP_client(){
 }
 
 void TCP_Client::init(byte rest_ip[4], uint16_t rest_port, char *rest_endpoint){
+    memcpy(server, rest_ip, 4);
+    port = rest_port;
+    endpoint = rest_endpoint;
+    buffer = NULL;
+    buf_len = 0;
 }
 
 void TCP_Client::set_buffer(char *buf, uint16_t len){
@@ -32,15 +37,27 @@ uint16_t TCP_Client::transmit_available(){
     return false;
 }
 
+/* Transmit for if you set the buffer.
+ * data should be a character array that is in JSON form
+ **/
 uint16_t TCP_Client::transmit(char *message, uint16_t message_len){
     transmit(buffer, buffer_len, message, message_len);
 }
 
+/**
+ * Transmit data if you haven't or don't want to set the buffer.
+ * Send the pointer to the buffer and the remaining length for the
+ * first two variables. The rest is the same as above.
+ **/
 uint16_t TCP_Client::transmit(char *big_buf, uint16_t big_buf_len,
         char *message, uint16_t message_len){
     char small_buf[10];
     char *place = big_buf;
     uint16_t sbuf_len= big_buf_len;
+
+    if(big_buf == NULL){
+        return -1;
+    }
 
     if(not manage_connection(cl)){
         return false;
@@ -59,20 +76,19 @@ uint16_t TCP_Client::transmit(char *big_buf, uint16_t big_buf_len,
     sbuf_len = bstrncpy(&place, "\r\n", sbuf_len);
 
     if(sbuf_len == 0){
-        Serial.println("BUF_LEN not enough!");
+        //Serial.println("BUF_LEN not enough!");
         return -1;
     }
 
     /*start = micros();*/
-    cl->client.write((const uint8_t *)big_buf, big_buf_len - sbuf_len);
+    client.write((const uint8_t *)big_buf, big_buf_len - sbuf_len); // Believe it or not -- this won't work for client.print!!!
     /*start = micros() - start;*/
     /*if(start > 600){*/
         /*Serial.println(start);*/
     /*}*/
 
-    cl->last_ran = millis();
-    cl->state = IO_SENDING;
+    last_ran = millis();
+    state = IO_SENDING;
     return true;
-
 }
 
